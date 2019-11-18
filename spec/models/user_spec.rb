@@ -78,7 +78,7 @@ RSpec.describe User, type: :model do
       @user.password = 'bn'
       @user.password_confirmation = 'bn'
 
-      @user.save
+      @user.save!
 
       @user2.name = 'user1'
       @user2.email = 'o@m.com'
@@ -97,7 +97,7 @@ RSpec.describe User, type: :model do
       @user.password = 'bn'
       @user.password_confirmation = 'bn'
 
-      @user.save
+      @user.save!
 
       @user2.name = 'user1'
       @user2.email = 'O@m.com'
@@ -105,6 +105,85 @@ RSpec.describe User, type: :model do
       @user2.password_confirmation = 'bn'
 
       expect(@user2).to_not be_valid
+    end
+  end
+
+  describe '.authenticate_with_credentials' do
+
+    it 'properly authenticates' do
+      @user = User.new
+
+      @user.name = 'user'
+      @user.email = 'o@m.com'
+      @user.password = 'bn'
+      @user.password_confirmation = 'bn'
+
+      @user.save!
+
+      @found_user = User.authenticate_with_credentials(@user.email, @user.password)
+
+      expect(@found_user).to be_an_instance_of User
+      expect(@found_user.name).to eql 'user'
+    end
+
+    it 'does not authenticate when given incorrect password' do
+      @user = User.new
+
+      @user.name = 'user'
+      @user.email = 'o@m.com'
+      @user.password = 'bn'
+      @user.password_confirmation = 'bn'
+
+      @user.save!
+
+      @found_user = User.authenticate_with_credentials(@user.email, 'wrong')
+
+      expect(@found_user).to be nil
+    end
+
+    it 'does not authenticate if user is not found' do
+      @user = User.new
+
+      @user.name = 'user'
+      @user.email = 'o@m.com'
+      @user.password = 'bn'
+      @user.password_confirmation = 'bn'
+
+      @user.save!
+
+      @found_user = User.authenticate_with_credentials('email@doesntexist.com', 'wrong')
+
+      expect(@found_user).to be nil
+    end
+
+    it 'authenticates emails with extra whitespace' do
+      @user = User.new
+
+      @user.name = 'user'
+      @user.email = 'o@m.com'
+      @user.password = 'bn'
+      @user.password_confirmation = 'bn'
+
+      @user.save!
+
+      @found_user = User.authenticate_with_credentials(' o@m.com ', @user.password)
+
+      expect(@found_user).to be_an_instance_of User
+    end
+
+    it 'authenticates emails typed in any case' do
+      @user = User.new
+
+      @user.name = 'user'
+      @user.email = 'o@m.com'
+      @user.password = 'bn'
+      @user.password_confirmation = 'bn'
+
+      @user.save!
+
+      @found_user = User.authenticate_with_credentials('O@m.coM', @user.password)
+
+      expect(@found_user).to be_an_instance_of User
     end
   end
 end

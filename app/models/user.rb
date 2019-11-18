@@ -7,4 +7,18 @@ class User < ActiveRecord::Base
   validates :password, length: { minimum: 2 }
   validates :password_confirmation, presence: true
 
+  def self.authenticate_with_credentials(email, password)
+    users = self.where('LOWER(email) ILIKE ?', email.gsub(/\s+/, ""))
+
+    if users
+      user = users[0]
+    end
+
+    if user && user.authenticate(password)
+      user
+    else
+      nil
+    end
+  end
+
 end
