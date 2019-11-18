@@ -1,5 +1,8 @@
 class ProductsController < ApplicationController
 
+  # uncomment this for restricted access
+  # before_filter :authorize
+
   def index
     @products = Product.all.order(created_at: :desc)
   end
